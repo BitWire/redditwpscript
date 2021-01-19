@@ -2,12 +2,13 @@
 
 import requests, random, shutil, subprocess
 from configparser import ConfigParser
-from os.path import expanduser
+from os.path import expanduser, dirname, realpath
 from pathlib import Path
 
 # Get configfile
+directory=dirname(realpath(__file__))
 config_object = ConfigParser()
-config_object.read("config.ini")
+config_object.read(directory +"/config.ini")
 config = config_object["CONFIG"]
 
 # Get the data link of the subreddit
