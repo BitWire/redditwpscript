@@ -1,4 +1,4 @@
-#!/us/bin/env python3
+#!/usr/bin/env python3
 
 import requests, random, shutil, subprocess
 from configparser import ConfigParser
@@ -26,7 +26,7 @@ json = r.json()
 paths = []
 
 # Get a picture for every monitor
-for i in range(0,config['monitors']):
+for i in range(0,int(config['monitors'])):
     item = random.randrange(0,24)
     post = json['data']['children'][item]['data']
     if post['post_hint'] != 'image':
