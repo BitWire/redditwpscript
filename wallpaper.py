@@ -1,3 +1,5 @@
+#!/us/bin/env python3
+
 import requests, random, shutil, subprocess
 from configparser import ConfigParser
 from os.path import expanduser
