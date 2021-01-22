@@ -11,7 +11,7 @@ Tested on Ubuntu 20.04 LTS
 
 Config is simple.
 Put in the subreddit you want to query, the folder you want them to be saved to and how many Displays you have.
-For changing the wallpapers in intervals, use cron with the python file directly like this:
+For changing the wallpapers in intervals, use cron with the included bash script directly like this:
 ```
-0 * * * * /bin/wallpaper.py
+* * * * * /path/to/wallpaper
 ```
