@@ -41,6 +41,7 @@ for i in range(0,int(config['monitors'])):
     paths.append(path + 'pic_' + str(i))
 
 # Call superpaper with the pictures
-call = ['superpaper','-s'] + paths
+path=expanduser("~") + "/.local/bin/"
+call = [path + 'superpaper','-s'] + paths
 subprocess.check_call(call)
 
