@@ -1,11 +1,17 @@
 # Reddit Wallpaper Script for Linux
 
-Tested on Ubuntu 20.04 LTS
+Tested on Ubuntu 22.04 LTS
 
 ## Dependencies
 
 - [Superpaper](https://github.com/hhannine/superpaper)
 - [Requests](https://requests.readthedocs.io/en/master/)
+- [DifPy](https://github.com/elisemercury/Duplicate-Image-Finder)
+
+## Usage
+
+Just call the bash script (or the python script directly). If you want to cleanup, you can do so by adding cleanup to the call as a parameter.
+This will run DifPy and deletes duplicates from the archive folder.
 
 ## Config
 
