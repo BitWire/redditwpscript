@@ -25,7 +25,8 @@ Path(path).mkdir(parents=True, exist_ok=True)
 Path(archivepath).mkdir(parents=True, exist_ok=True)
 
 if (data == 'cleanup'):
-    search = dif(archivepath, delete=True)
+    search = dif(archivepath, show_output=True, delete=True)
+    quit()
 
 # Save wallpapers
 for i in range(0,int(config['monitors'])):
@@ -60,7 +61,7 @@ for i in range(0,int(config['monitors'])):
     rename(f_path, archivepath + '/' + 'pic_' + str(i) + '_' + form_t + splitext(f_path)[1])
 
 # Make the actual request to get the data
-r = requests.get(link, headers = {'User-agent': 'wallpaperscript 0.1'})
+r = requests.get(link, headers = {'User-agent': 'wallpaperscript 0.2'})
 
 # Get the json data from the request
 json = r.json()
@@ -84,4 +85,4 @@ for i in range(0,int(config['monitors'])):
 path=expanduser("~") + "/.local/bin/"
 call = [path + 'superpaper','-s'] + paths
 subprocess.check_call(call)
-
+quit()
