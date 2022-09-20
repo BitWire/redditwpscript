@@ -12,7 +12,9 @@ directory=dirname(realpath(__file__))
 config_object = ConfigParser()
 config_object.read(directory +"/config.ini")
 config = config_object["CONFIG"]
-data = sys.argv[1]
+data = 'no'
+if '1' in sys.argv:
+    data = sys.argv[1]
 
 # Get the data link of the subreddit
 link='https://www.reddit.com/r/'+ config['subreddit'] +'/.json'
