@@ -2,9 +2,10 @@
 
 import requests, random, shutil, subprocess, time, sys
 from difPy import dif
+from screeninfo import get_monitors
 from configparser import ConfigParser
 from os.path import expanduser, dirname, realpath, getctime, splitext, exists
-from os import rename
+from os import rename, listdir
 from pathlib import Path
 
 # Get configfile
@@ -13,8 +14,23 @@ config_object = ConfigParser()
 config_object.read(directory +"/config.ini")
 config = config_object["CONFIG"]
 data = 'no'
-if '1' in sys.argv:
+arguments = sys.argv
+monitor_count = len(get_monitors())
+
+# Only get the monitor count from the config if its set, else use the automatically found
+if 'monitors' in config:
+    monitor_count = int(config['monitors'])
+
+# Get additional arguments if available
+if len(arguments) == 2:
     data = sys.argv[1]
+
+# Set Images by path
+def setImages(paths):
+    # Call superpaper with the pictures
+    path=expanduser("~") + "/.local/bin/"
+    call = [path + 'superpaper','-s'] + paths
+    subprocess.check_call(call)
 
 # Get the data link of the subreddit
 link='https://www.reddit.com/r/'+ config['subreddit'] +'/.json'
@@ -25,13 +41,22 @@ path= expanduser("~") + '/Pictures/' + config['foldername'] + '/'
 archivepath= expanduser("~") + '/Pictures/' + config['foldername'] + '/archive/'
 Path(path).mkdir(parents=True, exist_ok=True)
 Path(archivepath).mkdir(parents=True, exist_ok=True)
+paths = []
 
+#cleanup archive
 if (data == 'cleanup'):
     search = dif(archivepath, show_output=True, delete=True)
     quit()
 
+#use archive images
+if (data == 'local'):
+    for i in range(0,monitor_count):
+        paths.append(archivepath + random.choice(listdir(archivepath)))
+    setImages(paths)
+    quit()
+
 # Save wallpapers
-for i in range(0,int(config['monitors'])):
+for i in range(0,monitor_count):
     # Getting the path of the file
     f_path = path + 'pic_' + str(i)
 
@@ -63,14 +88,13 @@ for i in range(0,int(config['monitors'])):
     rename(f_path, archivepath + '/' + 'pic_' + str(i) + '_' + form_t + splitext(f_path)[1])
 
 # Make the actual request to get the data
-r = requests.get(link, headers = {'User-agent': 'wallpaperscript 0.2'})
+r = requests.get(link, headers = {'User-agent': 'wallpaperscript 0.3'})
 
 # Get the json data from the request
 json = r.json()
-paths = []
-
+    
 # Get a picture for every monitor
-for i in range(0,int(config['monitors'])):
+for i in range(0,monitor_count):
     item = random.randrange(0,24)
     post = json['data']['children'][item]['data']
     if post['post_hint'] != 'image':
@@ -83,8 +107,5 @@ for i in range(0,int(config['monitors'])):
             shutil.copyfileobj(image.raw, f)
     paths.append(path + 'pic_' + str(i))
 
-# Call superpaper with the pictures
-path=expanduser("~") + "/.local/bin/"
-call = [path + 'superpaper','-s'] + paths
-subprocess.check_call(call)
+setImages(paths)
 quit()
