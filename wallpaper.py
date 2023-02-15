@@ -92,12 +92,12 @@ r = requests.get(link, headers = {'User-agent': 'wallpaperscript 0.3'})
 
 # Get the json data from the request
 json = r.json()
-    
+
 # Get a picture for every monitor
 for i in range(0,monitor_count):
     item = random.randrange(0,24)
     post = json['data']['children'][item]['data']
-    if post['post_hint'] != 'image':
+    if 'post_hint' not in post or post['post_hint'] != 'image':
         i-=1
         break
     image = requests.get(post['url'], stream=True)
