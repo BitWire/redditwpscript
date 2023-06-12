@@ -93,6 +93,10 @@ r = requests.get(link, headers = {'User-agent': 'wallpaperscript 0.3'})
 # Get the json data from the request
 json = r.json()
 
+if 'error' in json:
+    print('Reddit gives this error: ' + json['error'] + ' - ' + json['reason'])
+    quit()
+
 # Get a picture for every monitor
 for i in range(0,monitor_count):
     item = random.randrange(0,24)
