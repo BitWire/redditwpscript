@@ -1,15 +1,16 @@
 # Reddit Wallpaper Script for Linux
 
-Tested on Ubuntu 22.04 LTS
+Tested on Kubuntu 26.04 (KDE Plasma 6, Wayland)
 
 This is a little script to load images from Subreddits like r/F1Porn, r/AbandonedPorn, r/EarthPorn etc and use them as wallpapers.
 They are saved automatically on your disk and can be "reused" again. You can also delete duplicates easily via parameter.
 
 ## Dependencies
 
-- [Superpaper](https://github.com/hhannine/superpaper)
 - [Requests](https://requests.readthedocs.io/en/master/)
-- [DifPy](https://github.com/elisemercury/Duplicate-Image-Finder)
+- [DifPy](https://github.com/elisemercury/Duplicate-Image-Finder) (only needed for `cleanup` command)
+- `qdbus6` (included with KDE Plasma 6)
+- `xrandr` (for automatic monitor detection)
 
 ## Usage
 
