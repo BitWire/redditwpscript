@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import requests, random, shutil, subprocess, time, sys
-from difPy import dif
+#from difPy import dif
 from screeninfo import get_monitors
 from configparser import ConfigParser
 from os.path import expanduser, dirname, realpath, getctime, splitext, exists
@@ -28,12 +28,12 @@ if len(arguments) == 2:
 # Set Images by path
 def setImages(paths):
     # Call superpaper with the pictures
-    path=expanduser("~") + "/.local/bin/"
-    call = [path + 'superpaper','-s'] + paths
+    path=expanduser("~") + "/Programs/"
+    call = [path + 'Superpaper.AppImage','-s'] + paths
     subprocess.check_call(call)
 
 # Get the data link of the subreddit
-link='https://www.reddit.com/r/'+ config['subreddit'] +'/.json'
+link='https://www.reddit.com/r/'+ config['subreddit'] +'/.rss'
 
 # Get the Path to save the pictures we will download, if it's not
 # there, it will be made
@@ -87,24 +87,37 @@ for i in range(0,monitor_count):
     # Renaming the filename to its timestamp
     rename(f_path, archivepath + '/' + 'pic_' + str(i) + '_' + form_t + splitext(f_path)[1])
 
-# Make the actual request to get the data
-r = requests.get(link, headers = {'User-agent': 'wallpaperscript 0.3'})
+# Make the actual request to get the data via RSS
+r = requests.get(link, headers={'User-Agent': 'wallpaperscript 0.4'})
 
-# Get the json data from the request
-json = r.json()
+if r.status_code != 200:
+    print('Reddit gives this error: ' + str(r.status_code))
+    quit()
 
-if 'error' in json:
-    print('Reddit gives this error: ' + json['error'] + ' - ' + json['reason'])
+# Parse RSS feed and extract image URLs
+root = ET.fromstring(r.text)
+ns = {'atom': 'http://www.w3.org/2005/Atom', 'media': 'http://search.yahoo.com/mrss/'}
+entries = root.findall('atom:entry', ns)
+
+# Collect all entries that have full-res images
+image_urls = []
+for entry in entries:
+    content = entry.find('atom:content', ns)
+    if content is not None and content.text:
+        # Find full-resolution i.redd.it links
+        imgs = re.findall(r'https://i\.redd\.it/[^"&]+\.(?:jpg|png|jpeg|webp)', content.text)
+        if imgs:
+            image_urls.append(imgs[0])
+
+if len(image_urls) == 0:
+    print('No images found in RSS feed')
     quit()
 
 # Get a picture for every monitor
-for i in range(0,monitor_count):
-    item = random.randrange(0,24)
-    post = json['data']['children'][item]['data']
-    if 'post_hint' not in post or post['post_hint'] != 'image':
-        i-=1
-        break
-    image = requests.get(post['url'], stream=True)
+# Get a picture for every monitor
+for i in range(0, monitor_count):
+    url = random.choice(image_urls)
+    image = requests.get(url, stream=True)
     if image.status_code == 200:
         with open(path + 'pic_' + str(i), 'wb') as f:
             image.raw.decode_content = True
