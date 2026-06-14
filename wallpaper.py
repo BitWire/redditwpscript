@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import requests, random, shutil, subprocess, time, sys
+import requests, random, shutil, subprocess, time, sys, re
 from configparser import ConfigParser
-from os.path import expanduser, dirname, realpath, getctime, splitext, exists
+from os.path import expanduser, dirname, realpath, getctime, splitext
 from os import rename, listdir
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 # Get configfile
 directory = dirname(realpath(__file__))
@@ -69,7 +70,7 @@ def set_images(paths):
 
 if __name__ == '__main__':
     # Get the data link of the subreddit
-    link = 'https://www.reddit.com/r/' + config['subreddit'] + '/.json'
+    link = 'https://www.reddit.com/r/' + config['subreddit'] + '/.rss'
 
     # Get the Path to save the pictures we will download, if it's not
     # there, it will be made
@@ -112,27 +113,39 @@ if __name__ == '__main__':
             rename(str(f), archivepath + f.stem + '_' + form_t + f.suffix)
 
     # Make the actual request to get the data
-    r = requests.get(link, headers={'User-agent': 'wallpaperscript 0.4'})
+    # Make the actual request to get the data via RSS
+    r = requests.get(link, headers={'User-Agent': 'wallpaperscript 0.4'})
 
-    # Get the json data from the request
-    json_data = r.json()
-
-    if 'error' in json_data:
-        print('Reddit error: ' + str(json_data['error']) + ' - ' + json_data.get('reason', 'unknown'))
+    if r.status_code != 200:
+        print('Reddit gives this error: ' + str(r.status_code))
         quit()
 
-    children = json_data['data']['children']
+    # Parse RSS feed and extract image URLs
+    root = ET.fromstring(r.text)
+    ns = {'atom': 'http://www.w3.org/2005/Atom', 'media': 'http://search.yahoo.com/mrss/'}
+    entries = root.findall('atom:entry', ns)
 
-    # Filter to image posts only
-    image_posts = [c['data'] for c in children if c['data'].get('post_hint') == 'image']
-    random.shuffle(image_posts)
+    # Collect all entries that have full-res images
+    image_urls = []
+    for entry in entries:
+        content = entry.find('atom:content', ns)
+        if content is not None and content.text:
+            # Find full-resolution i.redd.it links
+            imgs = re.findall(r'https://i\.redd\.it/[^"&]+\.(?:jpg|png|jpeg|webp)', content.text)
+            if imgs:
+                image_urls.append(imgs[0])
+
+    if len(image_urls) == 0:
+        print('No images found in RSS feed')
+        quit()
+
+    random.shuffle(image_urls)
 
     # Get a picture for every monitor
     i = 0
-    for post in image_posts:
+    for url in image_urls:
         if i >= monitor_count:
             break
-        url = post['url']
         ext = splitext(url.split('?')[0])[1]
         image = requests.get(url, headers={'User-agent': 'wallpaperscript 0.4'}, stream=True)
         if image.status_code == 200:
