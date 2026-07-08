@@ -88,7 +88,13 @@ for i in range(0,monitor_count):
     rename(f_path, archivepath + '/' + 'pic_' + str(i) + '_' + form_t + splitext(f_path)[1])
 
 # Make the actual request to get the data via RSS
-r = requests.get(link, headers={'User-Agent': 'wallpaperscript 0.4'})
+r = requests.get(link, headers={'User-Agent': 'wallpaperscript 0.5'})
+
+if float(r.headers.get('x-ratelimit-remaining', 1)) == 0:
+    reset = int(float(r.headers.get('x-ratelimit-reset', 60))) + 1
+    print(f'Rate limited, waiting {reset} seconds...')
+    time.sleep(reset)
+    r = requests.get(link, headers={'User-Agent': 'wallpaperscript 0.5'})
 
 if r.status_code != 200:
     print('Reddit gives this error: ' + str(r.status_code))
